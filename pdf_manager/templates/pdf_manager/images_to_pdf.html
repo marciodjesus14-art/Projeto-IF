@@ -1,0 +1,14 @@
+{% extends 'pdf_manager/base.html' %}
+
+{% block title %}Imagens para PDF | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <h1>Converter imagens para PDF</h1>
+  <form method="post" enctype="multipart/form-data" class="panel">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button primary" type="submit">Converter</button>
+  </form>
+</section>
+{% endblock %}

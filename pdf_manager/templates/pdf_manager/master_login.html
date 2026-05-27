@@ -1,0 +1,19 @@
+{% extends 'pdf_manager/master_base.html' %}
+
+{% block title %}Login Admin | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="auth-layout master-auth">
+  <div class="auth-copy">
+    <p class="eyebrow">Modo Admin</p>
+    <h1>Painel Administrador</h1>
+    <p>Acesse com uma conta autorizada para acompanhar usuarios, documentos e operacoes do sistema.</p>
+  </div>
+
+  <form method="post" class="panel auth-panel">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button primary" type="submit">Entrar no Painel</button>
+  </form>
+</section>
+{% endblock %}

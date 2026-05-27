@@ -1,0 +1,15 @@
+{% extends 'pdf_manager/base.html' %}
+
+{% block title %}{{ conversion_title }} | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="form-page">
+  <h1>{{ conversion_title }}</h1>
+  <p class="form-note">Conversao feita com LibreOffice. Tamanho maximo permitido: {{ max_upload_mb }} MB.</p>
+  <form method="post" enctype="multipart/form-data" class="panel">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button primary" type="submit">Converter para PDF</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'pdf_manager/master_base.html' %}
+
+{% block title %}Painel Administrador | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="master-header">
+  <div>
+    <p class="eyebrow">Visao geral</p>
+    <h1>Resumo da Plataforma</h1>
+    <p>Acompanhe os principais indicadores, usuarios recentes e documentos processados.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button" href="/admin/">Admin Django</a>
+    <a class="button ghost" href="{% url 'pdf_manager:master_logout' %}">Sair</a>
+  </div>
+</section>
+
+<section class="master-stats" aria-label="Indicadores do sistema">
+  <article>
+    <span>Documentos</span>
+    <strong>{{ documents_count }}</strong>
+  </article>
+  <article>
+    <span>Processados</span>
+    <strong>{{ processed_count }}</strong>
+  </article>
+  <article>
+    <span>Usuarios</span>
+    <strong>{{ users_count }}</strong>
+  </article>
+  <article>
+    <span>Admins</span>
+    <strong>{{ masters_count }}</strong>
+  </article>
+</section>
+
+<section class="master-grid">
+  <details class="section expandable-panel" open>
+    <summary class="section-heading">
+      <h2>Documentos recentes</h2>
+      <span class="panel-chevron" aria-hidden="true"></span>
+    </summary>
+    {% if recent_documents %}
+      <div class="master-list">
+        {% for document in recent_documents %}
+          <article class="master-list-row document-admin-row">
+            <a href="{% url 'pdf_manager:detail' document.pk %}">
+              <span>{{ document.title }}</span>
+              <small>{{ document.updated_at|date:'d/m/Y H:i' }}</small>
+            </a>
+            <form method="post" action="{% url 'pdf_manager:master_delete_document' document.pk %}" onsubmit="return confirm('Excluir este documento?');">
+              {% csrf_token %}
+              <button class="button danger-button" type="submit">Excluir</button>
+            </form>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted-text">Nenhum documento cadastrado.</p>
+    {% endif %}
+  </details>
+
+  <div class="section">
+    <div class="section-heading">
+      <h2>Usuarios recentes</h2>
+      <span>{{ users_count }} conta{{ users_count|pluralize }}</span>
+    </div>
+    {% if recent_users %}
+      <div class="master-list">
+        {% for user in recent_users %}
+          <div class="master-list-row">
+            <span>{{ user.get_full_name|default:user.username }}</span>
+            <small>{% if user.is_staff %}Admin{% else %}Usuario{% endif %} - {{ user.email|default:'sem e-mail' }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted-text">Nenhum usuario cadastrado.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

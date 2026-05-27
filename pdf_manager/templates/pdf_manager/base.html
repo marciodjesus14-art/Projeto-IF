@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Gerenciador de PDF Institucional{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'pdf_manager/styles.css' %}?v=12">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'pdf_manager:dashboard' %}">
+      <img class="brand-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
+    </a>
+    {% if request.user.is_authenticated %}
+    <nav class="nav" aria-label="Ferramentas PDF">
+      <a href="{% url 'pdf_manager:merge' %}">Juntar PDF</a>
+      <a href="{% url 'pdf_manager:upload' %}">Dividir PDF</a>
+      <a href="{% url 'pdf_manager:upload' %}">Organizar PDF</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-button" type="button" aria-expanded="false">
+          Converter PDF
+          <span class="chevron" aria-hidden="true"></span>
+        </button>
+        <div class="converter-menu">
+          <section>
+            <h2>Converter em PDF</h2>
+            <a href="{% url 'pdf_manager:images_to_pdf' %}"><span class="tool-icon image">JPG</span>JPG para PDF</a>
+            <a href="{% url 'pdf_manager:office_to_pdf' 'documento' %}"><span class="tool-icon word">DOC</span>Documento para PDF</a>
+            <a href="{% url 'pdf_manager:office_to_pdf' 'apresentacao' %}"><span class="tool-icon power">PPT</span>Apresentacao para PDF</a>
+            <a href="{% url 'pdf_manager:office_to_pdf' 'planilha' %}"><span class="tool-icon excel">XLS</span>Planilha para PDF</a>
+            <a href="{% url 'pdf_manager:office_to_pdf' 'html' %}"><span class="tool-icon html">HTML</span>HTML para PDF</a>
+          </section>
+          <section>
+            <h2>Converter de PDF</h2>
+            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon image">JPG</span>PDF para JPG</a>
+            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon word">DOC</span>PDF para Documento</a>
+            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon power">PPT</span>PDF para Apresentacao</a>
+            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon excel">XLS</span>PDF para Planilha</a>
+            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon pdfa">A</span>PDF para PDF/A</a>
+          </section>
+        </div>
+      </div>
+    </nav>
+    <div class="top-actions">
+      <a class="login-link" href="{% url 'pdf_manager:logout' %}">Sair</a>
+    </div>
+    {% endif %}
+  </header>
+
+  <main class="page">
+    {% if messages %}
+      <section class="messages" aria-label="Mensagens">
+        {% for message in messages %}
+          <p class="message {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

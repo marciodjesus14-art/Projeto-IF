@@ -1,0 +1,23 @@
+{% extends 'pdf_manager/base.html' %}
+{% load static %}
+
+{% block title %}Registre-se | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="access-stage">
+  <div class="access-card">
+    <img class="access-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
+    <div class="access-copy">
+      <p class="eyebrow">Acesso institucional</p>
+      <h1>Criar conta</h1>
+      <p>Use seu e-mail institucional para acessar as ferramentas de gerenciamento de documentos PDF.</p>
+    </div>
+    <form method="post" class="access-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button primary" type="submit">Criar conta</button>
+      <a class="button soft-button" href="{% url 'pdf_manager:login' %}">Ja tenho conta</a>
+    </form>
+  </div>
+</section>
+{% endblock %}

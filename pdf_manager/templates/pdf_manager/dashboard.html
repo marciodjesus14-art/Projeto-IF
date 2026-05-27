@@ -1,0 +1,82 @@
+{% extends 'pdf_manager/base.html' %}
+
+{% block title %}Ferramentas PDF | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+{% if not request.user.is_authenticated %}
+<section class="access-stage">
+  <div class="access-card access-card-wide">
+    {% load static %}
+    <img class="access-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
+    <div class="access-copy">
+      <p class="eyebrow">Documentos academicos</p>
+      <h1>Gerenciador de Documento PDF</h1>
+      <p>Acesse sua conta para organizar, converter, proteger e preparar documentos academicos com privacidade.</p>
+    </div>
+    <div class="gate-actions">
+      <a class="button primary" href="{% url 'pdf_manager:login' %}">Entrar</a>
+      <a class="button soft-button" href="{% url 'pdf_manager:register' %}">Criar conta</a>
+    </div>
+  </div>
+</section>
+
+{% else %}
+<section class="hero tool-hero">
+  <div>
+    <h1>Central de Documento PDF</h1>
+    <p>Prepare arquivos academicos com ferramentas de organizacao, conversao, protecao e assinatura visual.</p>
+  </div>
+  <div class="gate-actions">
+    <a class="button primary" href="{% url 'pdf_manager:upload' %}">Comecar com PDF</a>
+    <a class="button ghost" href="{% url 'pdf_manager:logout' %}">Sair</a>
+  </div>
+</section>
+
+<section class="tool-section">
+  <div class="section-heading">
+    <h2>Ferramentas principais</h2>
+    <span>Escolha uma acao para iniciar</span>
+  </div>
+
+  <div class="tool-grid">
+    <a class="tool-tile" href="{% url 'pdf_manager:upload' %}">
+      <span class="tool-tile-icon pdf">PDF</span>
+      <strong>Organizar PDF</strong>
+      <p>Reordenar, girar, extrair ou remover paginas.</p>
+    </a>
+    <a class="tool-tile" href="{% url 'pdf_manager:merge' %}">
+      <span class="tool-tile-icon merge">+</span>
+      <strong>Juntar PDF</strong>
+      <p>Unir varios arquivos em um unico documento.</p>
+    </a>
+    <a class="tool-tile" href="{% url 'pdf_manager:images_to_pdf' %}">
+      <span class="tool-tile-icon image">JPG</span>
+      <strong>Imagem para PDF</strong>
+      <p>Converter imagens em um arquivo PDF.</p>
+    </a>
+    <a class="tool-tile" href="{% url 'pdf_manager:office_to_pdf' 'documento' %}">
+      <span class="tool-tile-icon doc">DOC</span>
+      <strong>Documento para PDF</strong>
+      <p>Converter DOC, DOCX, ODT, RTF ou TXT.</p>
+    </a>
+    <a class="tool-tile" href="{% url 'pdf_manager:office_to_pdf' 'apresentacao' %}">
+      <span class="tool-tile-icon ppt">PPT</span>
+      <strong>Apresentacao para PDF</strong>
+      <p>Converter slides para distribuicao em PDF.</p>
+    </a>
+    <a class="tool-tile" href="{% url 'pdf_manager:office_to_pdf' 'planilha' %}">
+      <span class="tool-tile-icon xls">XLS</span>
+      <strong>Planilha para PDF</strong>
+      <p>Converter planilhas e CSV para PDF.</p>
+    </a>
+  </div>
+</section>
+
+<section class="privacy-strip">
+  <div>
+    <strong>Privacidade por padrao</strong>
+    <p>A pagina inicial nao exibe documentos enviados por usuarios. Arquivos ficam acessiveis apenas pelo fluxo de trabalho apos o envio.</p>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

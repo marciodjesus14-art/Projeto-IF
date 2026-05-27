@@ -1,0 +1,23 @@
+{% extends 'pdf_manager/base.html' %}
+{% load static %}
+
+{% block title %}Entrar | Gerenciador de PDF{% endblock %}
+
+{% block content %}
+<section class="access-stage">
+  <div class="access-card">
+    <img class="access-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
+    <div class="access-copy">
+      <p class="eyebrow">Acesso do usuario</p>
+      <h1>Entrar</h1>
+      <p>Acesse sua conta para usar as ferramentas e manter seus documentos vinculados ao seu perfil.</p>
+    </div>
+    <form method="post" class="access-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button primary" type="submit">Entrar</button>
+      <a class="button soft-button" href="{% url 'pdf_manager:register' %}">Criar conta</a>
+    </form>
+  </div>
+</section>
+{% endblock %}

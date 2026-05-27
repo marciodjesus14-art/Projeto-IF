@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Painel Administrador | Gerenciador de PDF{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'pdf_manager/styles.css' %}?v=11">
+</head>
+<body class="master-body">
+  <header class="master-top">
+    <a href="{% if request.user.is_authenticated and request.user.is_staff %}{% url 'pdf_manager:master_dashboard' %}{% else %}{% url 'pdf_manager:master_login' %}{% endif %}" aria-label="Voltar ao painel admin">
+      <img class="master-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
+    </a>
+    <div class="master-top-title">
+      <span>Modo Admin</span>
+      <strong>Painel Administrador</strong>
+    </div>
+  </header>
+
+  <main class="page master-page">
+    {% if messages %}
+      <section class="messages" aria-label="Mensagens">
+        {% for message in messages %}
+          <p class="message {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
