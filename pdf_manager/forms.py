@@ -16,7 +16,7 @@ def validate_pdf_upload(file_obj):
     max_size = max_pdf_upload_size_bytes()
     max_mb = getattr(settings, 'PDF_MANAGER_MAX_UPLOAD_MB', 25)
     if file_obj.size > max_size:
-        raise forms.ValidationError(f'O arquivo PDF deve ter no maximo {max_mb} MB.')
+        raise forms.ValidationError(f'O arquivo PDF deve ter no máximo {max_mb} MB.')
     if file_obj.content_type not in {'application/pdf', 'application/x-pdf'}:
         raise forms.ValidationError('Envie um arquivo no formato PDF.')
     return file_obj
@@ -26,7 +26,7 @@ def validate_file_size(file_obj):
     max_size = max_pdf_upload_size_bytes()
     max_mb = getattr(settings, 'PDF_MANAGER_MAX_UPLOAD_MB', 25)
     if file_obj.size > max_size:
-        raise forms.ValidationError(f'O arquivo deve ter no maximo {max_mb} MB.')
+        raise forms.ValidationError(f'O arquivo deve ter no máximo {max_mb} MB.')
     return file_obj
 
 
@@ -68,7 +68,7 @@ class MergeForm(forms.Form):
 
 
 class ImageToPdfForm(forms.Form):
-    title = forms.CharField(label='Titulo do PDF', max_length=180)
+    title = forms.CharField(label='Título do PDF', max_length=180)
     images = MultipleFileField(
         label='Imagens',
         widget=MultipleFileInput(attrs={'accept': 'image/*'}),
@@ -83,7 +83,7 @@ OFFICE_CONVERSION_TYPES = {
         'help': 'Formatos aceitos: DOC, DOCX, ODT, RTF e TXT.',
     },
     'apresentacao': {
-        'title': 'Apresentacao para PDF',
+        'title': 'Apresentação para PDF',
         'extensions': {'.ppt', '.pptx', '.odp'},
         'accept': '.ppt,.pptx,.odp',
         'help': 'Formatos aceitos: PPT, PPTX e ODP.',
@@ -119,14 +119,36 @@ class OfficeToPdfForm(forms.Form):
         allowed_extensions = OFFICE_CONVERSION_TYPES[self.conversion_type]['extensions']
         if suffix not in allowed_extensions:
             allowed = ', '.join(sorted(allowed_extensions))
-            raise forms.ValidationError(f'Formato nao suportado. Use: {allowed}.')
+            raise forms.ValidationError(f'Formato não suportado. Use: {allowed}.')
         return file_obj
 
 
 class RegisterForm(forms.ModelForm):
-    name = forms.CharField(label='Nome', max_length=150)
-    email = forms.EmailField(label='E-mail institucional')
-    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+    name = forms.CharField(
+        label='Nome',
+        max_length=150,
+        widget=forms.TextInput(
+            attrs={
+                'autocomplete': 'off',
+                'autocapitalize': 'words',
+                'spellcheck': 'false',
+            }
+        ),
+    )
+    email = forms.EmailField(
+        label='E-mail institucional',
+        widget=forms.EmailInput(
+            attrs={
+                'autocomplete': 'off',
+                'autocapitalize': 'none',
+                'spellcheck': 'false',
+            }
+        ),
+    )
+    password = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
 
     class Meta:
         model = User
@@ -135,7 +157,7 @@ class RegisterForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data['email'].strip().lower()
         if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError('Este e-mail ja esta cadastrado.')
+            raise forms.ValidationError('Este e-mail já está cadastrado.')
         return email
 
     def save(self, commit=True):
@@ -152,12 +174,24 @@ class RegisterForm(forms.ModelForm):
 
 
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(label='E-mail institucional')
-    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+    username = forms.CharField(
+        label='E-mail institucional',
+        widget=forms.TextInput(
+            attrs={
+                'autocomplete': 'off',
+                'autocapitalize': 'none',
+                'spellcheck': 'false',
+            }
+        ),
+    )
+    password = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
 
     error_messages = {
-        'invalid_login': 'E-mail ou senha invalidos.',
-        'inactive': 'Esta conta esta inativa.',
+        'invalid_login': 'E-mail ou senha inválidos.',
+        'inactive': 'Esta conta está inativa.',
     }
 
     def confirm_login_allowed(self, user):
@@ -170,18 +204,24 @@ class UserLoginForm(AuthenticationForm):
 
 
 class MasterLoginForm(AuthenticationForm):
-    username = forms.CharField(label='Usuario ou e-mail')
-    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+    username = forms.CharField(
+        label='Usuário ou e-mail',
+        widget=forms.TextInput(attrs={'autocomplete': 'username'}),
+    )
+    password = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}),
+    )
 
     error_messages = {
-        'invalid_login': 'Usuario ou senha invalidos.',
-        'inactive': 'Esta conta esta inativa.',
+        'invalid_login': 'Usuário ou senha inválidos.',
+        'inactive': 'Esta conta está inativa.',
     }
 
     def confirm_login_allowed(self, user):
         super().confirm_login_allowed(user)
         if not user.is_staff:
             raise forms.ValidationError(
-                'Esta conta nao possui permissao de administrador.',
+                'Esta conta não possui permissão de administrador.',
                 code='not_staff',
             )

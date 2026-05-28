@@ -1,6 +1,7 @@
 from io import BytesIO
 from pathlib import Path
 import subprocess
+from zipfile import ZIP_DEFLATED, ZipFile
 from tempfile import NamedTemporaryFile
 from tempfile import TemporaryDirectory
 
@@ -46,14 +47,14 @@ def extract_pages(document, page_numbers):
         if 0 <= index < len(reader.pages):
             writer.add_page(reader.pages[index])
     if not writer.pages:
-        raise ValueError('Nenhuma pagina valida foi informada.')
+        raise ValueError('Nenhuma página válida foi informada.')
     save_writer_to_document(document, writer, 'paginas')
 
 
 def reorder_pages(document, page_numbers):
     reader = _read_pdf(document.active_file)
     if sorted(page_numbers) != list(range(1, len(reader.pages) + 1)):
-        raise ValueError('Informe todas as paginas uma vez. Exemplo: 3,1,2.')
+        raise ValueError('Informe todas as páginas uma vez. Exemplo: 3,1,2.')
     writer = PdfWriter()
     for number in page_numbers:
         writer.add_page(reader.pages[number - 1])
@@ -68,7 +69,7 @@ def delete_pages(document, page_numbers):
         if index not in excluded:
             writer.add_page(page)
     if not writer.pages:
-        raise ValueError('O PDF precisa manter pelo menos uma pagina.')
+        raise ValueError('O PDF precisa manter pelo menos uma página.')
     save_writer_to_document(document, writer, 'sem-paginas')
 
 
@@ -111,6 +112,131 @@ def add_text(document, text, page_number, x, y, size):
             page.merge_page(PdfReader(overlay).pages[0])
         writer.add_page(page)
     save_writer_to_document(document, writer, 'texto')
+
+
+def replace_text_area(document, text, page_number, x, y, width, height, size):
+    try:
+        from reportlab.lib.colors import white
+        from reportlab.pdfgen import canvas
+    except ImportError as exc:
+        raise OptionalDependencyError('Instale reportlab para substituir texto no PDF.') from exc
+
+    if not text.strip():
+        raise ValueError('Informe o novo texto.')
+    reader = _read_pdf(document.active_file)
+    writer = PdfWriter()
+    for index, page in enumerate(reader.pages, start=1):
+        if index == page_number:
+            page_width = float(page.mediabox.width)
+            page_height = float(page.mediabox.height)
+            overlay = BytesIO()
+            packet = canvas.Canvas(overlay, pagesize=(page_width, page_height))
+            packet.setFillColor(white)
+            packet.setStrokeColor(white)
+            packet.rect(x, y, width, height, fill=1, stroke=0)
+            packet.setFillColorRGB(0, 0, 0)
+            packet.setFont('Helvetica', size)
+            packet.drawString(x + 4, y + max(4, (height - size) / 2), text)
+            packet.save()
+            overlay.seek(0)
+            page.merge_page(PdfReader(overlay).pages[0])
+        writer.add_page(page)
+    save_writer_to_document(document, writer, 'texto-substituido')
+
+
+def add_watermark(document, text, size=44):
+    try:
+        from reportlab.lib.colors import Color
+        from reportlab.pdfgen import canvas
+    except ImportError as exc:
+        raise OptionalDependencyError("Instale reportlab para inserir marca d'água.") from exc
+
+    if not text.strip():
+        raise ValueError("Informe o texto da marca d'água.")
+    reader = _read_pdf(document.active_file)
+    writer = PdfWriter()
+    for page in reader.pages:
+        page_width = float(page.mediabox.width)
+        page_height = float(page.mediabox.height)
+        overlay = BytesIO()
+        packet = canvas.Canvas(overlay, pagesize=(page_width, page_height))
+        packet.saveState()
+        packet.translate(page_width / 2, page_height / 2)
+        packet.rotate(35)
+        packet.setFillColor(Color(0.1, 0.35, 0.28, alpha=0.18))
+        packet.setFont('Helvetica-Bold', size)
+        packet.drawCentredString(0, 0, text)
+        packet.restoreState()
+        packet.save()
+        overlay.seek(0)
+        page.merge_page(PdfReader(overlay).pages[0])
+        writer.add_page(page)
+    save_writer_to_document(document, writer, 'marca-dagua')
+
+
+def add_shape(document, shape, page_number, x, y, width, height, color_hex):
+    try:
+        from reportlab.lib.colors import HexColor
+        from reportlab.pdfgen import canvas
+    except ImportError as exc:
+        raise OptionalDependencyError('Instale reportlab para inserir formas no PDF.') from exc
+
+    color = HexColor(color_hex or '#116149')
+    reader = _read_pdf(document.active_file)
+    writer = PdfWriter()
+    for index, page in enumerate(reader.pages, start=1):
+        if index == page_number:
+            page_width = float(page.mediabox.width)
+            page_height = float(page.mediabox.height)
+            overlay = BytesIO()
+            packet = canvas.Canvas(overlay, pagesize=(page_width, page_height))
+            packet.setStrokeColor(color)
+            packet.setFillColor(color)
+            packet.setLineWidth(2)
+            if shape == 'line':
+                packet.line(x, y, x + width, y + height)
+            elif shape == 'circle':
+                packet.circle(x + width / 2, y + height / 2, min(width, height) / 2, fill=0, stroke=1)
+            else:
+                packet.rect(x, y, width, height, fill=0, stroke=1)
+            packet.save()
+            overlay.seek(0)
+            page.merge_page(PdfReader(overlay).pages[0])
+        writer.add_page(page)
+    save_writer_to_document(document, writer, 'forma')
+
+
+def add_qr_code(document, data, page_number, x, y, size):
+    try:
+        from reportlab.graphics.barcode.qr import QrCodeWidget
+        from reportlab.graphics import renderPDF
+        from reportlab.graphics.shapes import Drawing
+        from reportlab.pdfgen import canvas
+    except ImportError as exc:
+        raise OptionalDependencyError('Instale reportlab para inserir QR Code no PDF.') from exc
+
+    if not data.strip():
+        raise ValueError('Informe o conteúdo do QR Code.')
+    reader = _read_pdf(document.active_file)
+    writer = PdfWriter()
+    for index, page in enumerate(reader.pages, start=1):
+        if index == page_number:
+            page_width = float(page.mediabox.width)
+            page_height = float(page.mediabox.height)
+            overlay = BytesIO()
+            packet = canvas.Canvas(overlay, pagesize=(page_width, page_height))
+            qr_code = QrCodeWidget(data)
+            bounds = qr_code.getBounds()
+            qr_width = bounds[2] - bounds[0]
+            qr_height = bounds[3] - bounds[1]
+            drawing = Drawing(size, size, transform=[size / qr_width, 0, 0, size / qr_height, 0, 0])
+            drawing.add(qr_code)
+            renderPDF.draw(drawing, packet, x, y)
+            packet.save()
+            overlay.seek(0)
+            page.merge_page(PdfReader(overlay).pages[0])
+        writer.add_page(page)
+    save_writer_to_document(document, writer, 'qr-code')
 
 
 def add_image(document, image_file, page_number, x, y, width):
@@ -175,7 +301,7 @@ def get_libreoffice_executable():
             continue
         if Path(candidate).exists() or candidate in {'soffice', 'libreoffice'}:
             return candidate
-    raise OptionalDependencyError('LibreOffice nao foi encontrado neste computador.')
+    raise OptionalDependencyError('LibreOffice não foi encontrado neste computador.')
 
 
 def office_to_pdf_bytes(uploaded_file):
@@ -203,14 +329,14 @@ def office_to_pdf_bytes(uploaded_file):
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=90)
         except FileNotFoundError as exc:
-            raise OptionalDependencyError('LibreOffice nao foi encontrado no PATH do sistema.') from exc
+            raise OptionalDependencyError('LibreOffice não foi encontrado no PATH do sistema.') from exc
         except subprocess.TimeoutExpired as exc:
-            raise OptionalDependencyError('A conversao demorou demais e foi interrompida.') from exc
+            raise OptionalDependencyError('A conversão demorou demais e foi interrompida.') from exc
 
         output_pdf = output_dir / f'{original_name.stem}.pdf'
         if result.returncode != 0 or not output_pdf.exists():
             detail = (result.stderr or result.stdout or '').strip()
-            message = 'Nao foi possivel converter o arquivo com o LibreOffice.'
+            message = 'Não foi possível converter o arquivo com o LibreOffice.'
             if detail:
                 message = f'{message} Detalhe: {detail[:300]}'
             raise ValueError(message)
@@ -228,12 +354,12 @@ def pdf_page_preview_bytes(file_obj, page_number=1, zoom=1.8):
     try:
         import fitz
     except ImportError as exc:
-        raise OptionalDependencyError('Instale PyMuPDF para gerar a pre-visualizacao do PDF.') from exc
+        raise OptionalDependencyError('Instale PyMuPDF para gerar a pré-visualização do PDF.') from exc
 
     file_obj.seek(0)
     with fitz.open(stream=file_obj.read(), filetype='pdf') as pdf:
         if pdf.page_count == 0:
-            raise ValueError('O PDF nao possui paginas para pre-visualizar.')
+            raise ValueError('O PDF não possui páginas para pré-visualizar.')
         page_index = max(0, min(page_number - 1, pdf.page_count - 1))
         page = pdf.load_page(page_index)
         matrix = fitz.Matrix(zoom, zoom)
@@ -241,8 +367,29 @@ def pdf_page_preview_bytes(file_obj, page_number=1, zoom=1.8):
         return pixmap.tobytes('png')
 
 
+def pdf_to_jpg_zip_bytes(file_obj, zoom=2.0):
+    try:
+        import fitz
+    except ImportError as exc:
+        raise OptionalDependencyError('Instale PyMuPDF para converter PDF em JPG.') from exc
+
+    file_obj.seek(0)
+    zip_buffer = BytesIO()
+    with fitz.open(stream=file_obj.read(), filetype='pdf') as pdf:
+        if pdf.page_count == 0:
+            raise ValueError('O PDF não possui páginas para converter.')
+
+        with ZipFile(zip_buffer, 'w', ZIP_DEFLATED) as zip_file:
+            matrix = fitz.Matrix(zoom, zoom)
+            for index, page in enumerate(pdf, start=1):
+                pixmap = page.get_pixmap(matrix=matrix, alpha=False)
+                zip_file.writestr(f'pagina-{index}.jpg', pixmap.tobytes('jpg'))
+
+    return zip_buffer.getvalue()
+
+
 def parse_page_numbers(raw_value):
     try:
         return [int(part.strip()) for part in raw_value.split(',') if part.strip()]
     except ValueError as exc:
-        raise ValueError('Use apenas numeros separados por virgula.') from exc
+        raise ValueError('Use apenas números separados por vírgula.') from exc

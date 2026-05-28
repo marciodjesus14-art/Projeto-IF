@@ -9,9 +9,15 @@
     {% load static %}
     <img class="access-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
     <div class="access-copy">
-      <p class="eyebrow">Documentos academicos</p>
-      <h1>Gerenciador de Documento PDF</h1>
-      <p>Acesse sua conta para organizar, converter, proteger e preparar documentos academicos com privacidade.</p>
+      <p class="eyebrow">Acesso do usuário</p>
+      <h1><span>IFDOC</span><span>EDITOR DE PDF PARA GESTÃO DOCUMENTAL</span></h1>
+      <p>Acesse sua conta para organizar, converter, proteger e preparar documentos acadêmicos com privacidade.</p>
+    </div>
+    <div class="access-tools" aria-label="Ferramentas disponíveis">
+      <span>Organizar PDF</span>
+      <span>Juntar arquivos</span>
+      <span>Converter documentos</span>
+      <span>Proteger PDF</span>
     </div>
     <div class="gate-actions">
       <a class="button primary" href="{% url 'pdf_manager:login' %}">Entrar</a>
@@ -23,31 +29,30 @@
 {% else %}
 <section class="hero tool-hero">
   <div>
-    <h1>Central de Documento PDF</h1>
-    <p>Prepare arquivos academicos com ferramentas de organizacao, conversao, protecao e assinatura visual.</p>
+    <h1>Central de Documentos PDF</h1>
+    <p>Prepare arquivos acadêmicos com ferramentas de organização, conversão, proteção e assinatura visual.</p>
   </div>
-  <div class="gate-actions">
-    <a class="button primary" href="{% url 'pdf_manager:upload' %}">Comecar com PDF</a>
-    <a class="button ghost" href="{% url 'pdf_manager:logout' %}">Sair</a>
+  <div class="hero-actions">
+    <a class="button primary" href="{% url 'pdf_manager:upload' %}">Começar com PDF</a>
   </div>
 </section>
 
 <section class="tool-section">
   <div class="section-heading">
     <h2>Ferramentas principais</h2>
-    <span>Escolha uma acao para iniciar</span>
+    <span>Escolha uma ação para iniciar</span>
   </div>
 
   <div class="tool-grid">
     <a class="tool-tile" href="{% url 'pdf_manager:upload' %}">
       <span class="tool-tile-icon pdf">PDF</span>
       <strong>Organizar PDF</strong>
-      <p>Reordenar, girar, extrair ou remover paginas.</p>
+      <p>Reordenar, girar, extrair ou remover páginas.</p>
     </a>
     <a class="tool-tile" href="{% url 'pdf_manager:merge' %}">
       <span class="tool-tile-icon merge">+</span>
       <strong>Juntar PDF</strong>
-      <p>Unir varios arquivos em um unico documento.</p>
+      <p>Unir vários arquivos em um único documento.</p>
     </a>
     <a class="tool-tile" href="{% url 'pdf_manager:images_to_pdf' %}">
       <span class="tool-tile-icon image">JPG</span>
@@ -61,8 +66,8 @@
     </a>
     <a class="tool-tile" href="{% url 'pdf_manager:office_to_pdf' 'apresentacao' %}">
       <span class="tool-tile-icon ppt">PPT</span>
-      <strong>Apresentacao para PDF</strong>
-      <p>Converter slides para distribuicao em PDF.</p>
+      <strong>Apresentação para PDF</strong>
+      <p>Converter slides para distribuição em PDF.</p>
     </a>
     <a class="tool-tile" href="{% url 'pdf_manager:office_to_pdf' 'planilha' %}">
       <span class="tool-tile-icon xls">XLS</span>
@@ -74,8 +79,8 @@
 
 <section class="privacy-strip">
   <div>
-    <strong>Privacidade por padrao</strong>
-    <p>A pagina inicial nao exibe documentos enviados por usuarios. Arquivos ficam acessiveis apenas pelo fluxo de trabalho apos o envio.</p>
+    <strong>Privacidade por padrão</strong>
+    <p>A página inicial não exibe documentos enviados por usuários. Arquivos ficam acessíveis apenas pelo fluxo de trabalho após o envio.</p>
   </div>
 </section>
 {% endif %}

@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import Document
+from .models import Document, ProcessingLog
 
 
 admin.site.site_header = 'Admin IF Baiano'
 admin.site.site_title = 'Gerenciador de PDF'
-admin.site.index_title = 'Administracao do sistema'
+admin.site.index_title = 'Administração do sistema'
 
 
 @admin.register(Document)
@@ -19,6 +19,14 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'owner', 'created_at', 'updated_at')
     list_filter = ('owner', 'created_at')
     search_fields = ('title', 'owner__username', 'owner__email')
+
+
+@admin.register(ProcessingLog)
+class ProcessingLogAdmin(admin.ModelAdmin):
+    list_display = ('operation', 'source_name', 'user', 'created_at')
+    list_filter = ('operation', 'created_at')
+    date_hierarchy = 'created_at'
+    search_fields = ('source_name', 'user__username', 'user__email')
 
 
 admin.site.unregister(User)
@@ -30,10 +38,10 @@ class CustomUserChangeForm(UserChangeForm):
     role = forms.ChoiceField(
         label='Papel',
         choices=(
-            (ROLE_USER, 'Usuario'),
+            (ROLE_USER, 'Usuário'),
             (ROLE_ADMIN, 'Admin'),
         ),
-        help_text='Define se a conta acessa apenas as ferramentas ou tambem o painel administrativo.',
+        help_text='Define se a conta acessa apenas as ferramentas ou também o painel administrativo.',
     )
 
     class Meta(UserChangeForm.Meta):
@@ -79,24 +87,24 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Papel no sistema', {'fields': ('role',)}),
-        ('Informacoes pessoais', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissoes avancadas', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Informações pessoais', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissões avançadas', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Datas importantes', {'fields': ('last_login', 'date_joined')}),
     )
 
     @admin.display(description='Papel')
     def role(self, obj):
-        return 'Admin' if obj.is_staff else 'Usuario'
+        return 'Admin' if obj.is_staff else 'Usuário'
 
     @admin.action(description='Definir selecionados como Admin')
     def make_admin(self, request, queryset):
         updated = queryset.update(is_staff=True)
-        self.message_user(request, f'{updated} usuario(s) definidos como Admin.')
+        self.message_user(request, f'{updated} usuário(s) definidos como Admin.')
 
-    @admin.action(description='Definir selecionados como Usuario')
+    @admin.action(description='Definir selecionados como Usuário')
     def make_regular_user(self, request, queryset):
         updated = queryset.update(is_staff=False, is_superuser=False)
-        self.message_user(request, f'{updated} usuario(s) definidos como Usuario.')
+        self.message_user(request, f'{updated} usuário(s) definidos como Usuário.')
 
     @admin.display(description='Senha')
     def password_reset_link(self, obj):

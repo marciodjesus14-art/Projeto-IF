@@ -5,11 +5,11 @@
 {% block content %}
 <section class="form-page">
   <h1>Juntar PDFs</h1>
-  <p class="form-note">Cada PDF pode ter ate {{ max_upload_mb }} MB.</p>
+  <p class="form-note">Cada PDF pode ter até {{ max_upload_mb }} MB.</p>
   <form method="post" enctype="multipart/form-data" class="panel">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="button primary" type="submit">Criar PDF unico</button>
+    <button class="button primary" type="submit">Criar PDF único</button>
   </form>
 </section>
 {% endblock %}

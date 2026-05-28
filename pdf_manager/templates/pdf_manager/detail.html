@@ -11,6 +11,12 @@
     <p>Atualizado em {{ document.updated_at|date:'d/m/Y H:i' }}</p>
   </div>
   <div class="header-actions">
+    {% if document.processed_file %}
+      <form method="post" action="{% url 'pdf_manager:cancel_changes' document.pk %}" onsubmit="return confirm('Cancelar as alterações e voltar ao PDF original?');">
+        {% csrf_token %}
+        <button class="button danger-button" type="submit">Cancelar alterações</button>
+      </form>
+    {% endif %}
     <a class="button" href="{{ document.active_file.url }}" target="_blank" rel="noopener">Abrir em nova aba</a>
     <a class="button primary" href="{% url 'pdf_manager:download' document.pk %}">Baixar PDF</a>
   </div>
@@ -20,25 +26,25 @@
   <div class="preview-panel preview-summary">
     <div class="preview-toolbar">
       <div>
-        <strong>Pre-visualizacao</strong>
+        <strong>Pré-visualização</strong>
         <span>{{ document.active_file.name }}</span>
       </div>
       <a class="button ghost" href="{% url 'pdf_manager:download' document.pk %}">Baixar</a>
     </div>
     <div class="preview-state">
-      <div class="pdf-pages-preview" aria-label="Pre-visualizacao das paginas">
+      <div class="pdf-pages-preview" aria-label="Pré-visualização das páginas">
         {% for page_number in page_numbers %}
-          <a class="pdf-page-card" href="{{ document.active_file.url }}#page={{ page_number }}" target="_blank" rel="noopener" aria-label="Abrir pagina {{ page_number }}">
+          <a class="pdf-page-card" href="{{ document.active_file.url }}#page={{ page_number }}" target="_blank" rel="noopener" aria-label="Abrir página {{ page_number }}">
             <span class="page-check" aria-hidden="true"></span>
             <span class="page-paper">
-              <img src="{% url 'pdf_manager:preview' document.pk %}?page={{ page_number }}" alt="Pagina {{ page_number }} de {{ document.title }}">
+              <img src="{% url 'pdf_manager:preview' document.pk %}?page={{ page_number }}" alt="Página {{ page_number }} de {{ document.title }}">
             </span>
             <strong>{{ page_number }}</strong>
           </a>
         {% endfor %}
       </div>
       <h2>{{ document.title }}</h2>
-      <p>Selecione uma miniatura para abrir o PDF na pagina desejada. Use as ferramentas ao lado para organizar, proteger e editar o arquivo.</p>
+      <p>Selecione uma miniatura para abrir o PDF na página desejada. Use as ferramentas ao lado para organizar, proteger e editar o arquivo.</p>
       <div class="preview-actions">
         <a class="button primary" href="{{ document.active_file.url }}" target="_blank" rel="noopener">Abrir PDF</a>
         <a class="button" href="{% url 'pdf_manager:download' document.pk %}">Baixar arquivo</a>
@@ -48,14 +54,14 @@
 
   <aside class="tools">
     <div class="tool-group">
-      <h2>Paginas</h2>
+      <h2>Páginas</h2>
       <p>Organize o documento sem sair desta tela.</p>
     </div>
 
     <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
       {% csrf_token %}
       <input type="hidden" name="operation" value="rotate">
-      <h3>Girar paginas</h3>
+      <h3>Girar páginas</h3>
       <label>Graus
         <select name="degrees">
           <option value="90">90</option>
@@ -69,7 +75,7 @@
     <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
       {% csrf_token %}
       <input type="hidden" name="operation" value="reorder">
-      <h3>Reordenar paginas</h3>
+      <h3>Reordenar páginas</h3>
       <label>Ordem
         <input name="pages" placeholder="3,1,2">
       </label>
@@ -79,8 +85,8 @@
     <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
       {% csrf_token %}
       <input type="hidden" name="operation" value="delete">
-      <h3>Excluir paginas</h3>
-      <label>Paginas
+      <h3>Excluir páginas</h3>
+      <label>Páginas
         <input name="pages" placeholder="2,4">
       </label>
       <button class="button" type="submit">Excluir</button>
@@ -89,15 +95,15 @@
     <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
       {% csrf_token %}
       <input type="hidden" name="operation" value="extract">
-      <h3>Extrair paginas</h3>
-      <label>Paginas
+      <h3>Extrair páginas</h3>
+      <label>Páginas
         <input name="pages" placeholder="1,5,7">
       </label>
       <button class="button" type="submit">Extrair</button>
     </form>
 
     <div class="tool-group">
-      <h2>Conteudo</h2>
+      <h2>Conteúdo</h2>
       <p>Inclua texto, imagem ou assinatura visual.</p>
     </div>
 
@@ -107,12 +113,28 @@
       <h3>Inserir texto</h3>
       <label>Texto <input name="text" placeholder="Aprovado pela secretaria"></label>
       <div class="grid-fields">
-        <label>Pagina <input name="page" type="number" min="1" value="1"></label>
+        <label>Página <input name="page" type="number" min="1" value="1"></label>
         <label>Tamanho <input name="size" type="number" min="8" value="12"></label>
         <label>X <input name="x" type="number" value="72"></label>
         <label>Y <input name="y" type="number" value="720"></label>
       </div>
       <button class="button" type="submit">Inserir</button>
+    </form>
+
+    <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="operation" value="replace_text">
+      <h3>Substituir texto visualmente</h3>
+      <label>Novo texto <input name="text" placeholder="Texto corrigido"></label>
+      <div class="grid-fields">
+        <label>Página <input name="page" type="number" min="1" value="1"></label>
+        <label>Tamanho <input name="size" type="number" min="8" value="12"></label>
+        <label>X <input name="x" type="number" value="72"></label>
+        <label>Y <input name="y" type="number" value="700"></label>
+        <label>Largura <input name="width" type="number" value="240"></label>
+        <label>Altura <input name="height" type="number" value="28"></label>
+      </div>
+      <button class="button" type="submit">Substituir</button>
     </form>
 
     <form class="tool-card" method="post" enctype="multipart/form-data" action="{% url 'pdf_manager:operate' document.pk %}">
@@ -121,7 +143,7 @@
       <h3>Assinatura visual ou imagem</h3>
       <label>Arquivo de imagem <input name="image" type="file" accept="image/*"></label>
       <div class="grid-fields">
-        <label>Pagina <input name="page" type="number" min="1" value="1"></label>
+        <label>Página <input name="page" type="number" min="1" value="1"></label>
         <label>Largura <input name="width" type="number" value="160"></label>
         <label>X <input name="x" type="number" value="72"></label>
         <label>Y <input name="y" type="number" value="640"></label>
@@ -129,8 +151,53 @@
       <button class="button" type="submit">Inserir imagem</button>
     </form>
 
+    <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="operation" value="watermark">
+      <h3>Marca d'água</h3>
+      <label>Texto <input name="text" placeholder="CONFIDENCIAL"></label>
+      <label>Tamanho <input name="size" type="number" min="18" value="44"></label>
+      <button class="button" type="submit">Aplicar marca</button>
+    </form>
+
+    <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="operation" value="shape">
+      <h3>Forma gráfica</h3>
+      <label>Tipo
+        <select name="shape">
+          <option value="rect">Retângulo</option>
+          <option value="circle">Círculo</option>
+          <option value="line">Linha</option>
+        </select>
+      </label>
+      <div class="grid-fields">
+        <label>Página <input name="page" type="number" min="1" value="1"></label>
+        <label>Cor <input name="color" type="color" value="#116149"></label>
+        <label>X <input name="x" type="number" value="72"></label>
+        <label>Y <input name="y" type="number" value="640"></label>
+        <label>Largura <input name="width" type="number" value="160"></label>
+        <label>Altura <input name="height" type="number" value="80"></label>
+      </div>
+      <button class="button" type="submit">Inserir forma</button>
+    </form>
+
+    <form class="tool-card" method="post" action="{% url 'pdf_manager:operate' document.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="operation" value="qr_code">
+      <h3>QR Code</h3>
+      <label>Conteúdo <input name="data" placeholder="https://... ou código de validação"></label>
+      <div class="grid-fields">
+        <label>Página <input name="page" type="number" min="1" value="1"></label>
+        <label>Tamanho <input name="size" type="number" min="48" value="96"></label>
+        <label>X <input name="x" type="number" value="72"></label>
+        <label>Y <input name="y" type="number" value="640"></label>
+      </div>
+      <button class="button" type="submit">Inserir QR Code</button>
+    </form>
+
     <div class="tool-group">
-      <h2>Seguranca</h2>
+      <h2>Segurança</h2>
       <p>Adicione senha ao arquivo final.</p>
     </div>
 

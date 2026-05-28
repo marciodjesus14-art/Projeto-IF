@@ -5,7 +5,7 @@
 {% block content %}
 <section class="form-page">
   <h1>{{ conversion_title }}</h1>
-  <p class="form-note">Conversao feita com LibreOffice. Tamanho maximo permitido: {{ max_upload_mb }} MB.</p>
+  <p class="form-note">Conversão feita com LibreOffice. Tamanho máximo permitido: {{ max_upload_mb }} MB.</p>
   <form method="post" enctype="multipart/form-data" class="panel">
     {% csrf_token %}
     {{ form.as_p }}

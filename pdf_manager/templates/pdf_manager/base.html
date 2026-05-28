@@ -27,16 +27,13 @@
             <h2>Converter em PDF</h2>
             <a href="{% url 'pdf_manager:images_to_pdf' %}"><span class="tool-icon image">JPG</span>JPG para PDF</a>
             <a href="{% url 'pdf_manager:office_to_pdf' 'documento' %}"><span class="tool-icon word">DOC</span>Documento para PDF</a>
-            <a href="{% url 'pdf_manager:office_to_pdf' 'apresentacao' %}"><span class="tool-icon power">PPT</span>Apresentacao para PDF</a>
+            <a href="{% url 'pdf_manager:office_to_pdf' 'apresentacao' %}"><span class="tool-icon power">PPT</span>Apresentação para PDF</a>
             <a href="{% url 'pdf_manager:office_to_pdf' 'planilha' %}"><span class="tool-icon excel">XLS</span>Planilha para PDF</a>
             <a href="{% url 'pdf_manager:office_to_pdf' 'html' %}"><span class="tool-icon html">HTML</span>HTML para PDF</a>
           </section>
           <section>
             <h2>Converter de PDF</h2>
-            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon image">JPG</span>PDF para JPG</a>
-            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon word">DOC</span>PDF para Documento</a>
-            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon power">PPT</span>PDF para Apresentacao</a>
-            <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon excel">XLS</span>PDF para Planilha</a>
+            <a href="{% url 'pdf_manager:pdf_to_jpg' %}"><span class="tool-icon image">JPG</span>PDF para JPG</a>
             <a href="{% url 'pdf_manager:upload' %}"><span class="tool-icon pdfa">A</span>PDF para PDF/A</a>
           </section>
         </div>

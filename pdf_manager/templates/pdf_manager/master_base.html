@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Painel Administrador | Gerenciador de PDF{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'pdf_manager/styles.css' %}?v=11">
+  <link rel="stylesheet" href="{% static 'pdf_manager/styles.css' %}?v=13">
 </head>
 <body class="master-body">
   <header class="master-top">
@@ -14,8 +14,11 @@
     </a>
     <div class="master-top-title">
       <span>Modo Admin</span>
-      <strong>Painel Administrador</strong>
+      <strong>PAINEL ADMINISTRADOR</strong>
     </div>
+    {% if request.user.is_authenticated and request.user.is_staff %}
+      <a class="button primary master-logout-button" href="{% url 'pdf_manager:master_logout' %}">Sair</a>
+    {% endif %}
   </header>
 
   <main class="page master-page">

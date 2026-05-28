@@ -5,13 +5,13 @@
 {% block content %}
 <section class="master-header">
   <div>
-    <p class="eyebrow">Visao geral</p>
+    <p class="eyebrow">Visão geral</p>
     <h1>Resumo da Plataforma</h1>
-    <p>Acompanhe os principais indicadores, usuarios recentes e documentos processados.</p>
+    <p>Acompanhe os principais indicadores, usuários recentes e documentos processados.</p>
   </div>
   <div class="header-actions">
-    <a class="button" href="/admin/">Admin Django</a>
-    <a class="button ghost" href="{% url 'pdf_manager:master_logout' %}">Sair</a>
+    <a class="button" href="/admin/" target="_blank" rel="noopener">Admin Django</a>
+    <a class="button" href="/admin/pdf_manager/processinglog/" target="_blank" rel="noopener">Relatório de Uso</a>
   </div>
 </section>
 
@@ -25,7 +25,7 @@
     <strong>{{ processed_count }}</strong>
   </article>
   <article>
-    <span>Usuarios</span>
+    <span>Usuários</span>
     <strong>{{ users_count }}</strong>
   </article>
   <article>
@@ -41,20 +41,40 @@
       <span class="panel-chevron" aria-hidden="true"></span>
     </summary>
     {% if recent_documents %}
-      <div class="master-list">
-        {% for document in recent_documents %}
-          <article class="master-list-row document-admin-row">
-            <a href="{% url 'pdf_manager:detail' document.pk %}">
-              <span>{{ document.title }}</span>
-              <small>{{ document.updated_at|date:'d/m/Y H:i' }}</small>
-            </a>
-            <form method="post" action="{% url 'pdf_manager:master_delete_document' document.pk %}" onsubmit="return confirm('Excluir este documento?');">
-              {% csrf_token %}
-              <button class="button danger-button" type="submit">Excluir</button>
-            </form>
-          </article>
-        {% endfor %}
-      </div>
+      <form class="bulk-delete-form" method="post" action="{% url 'pdf_manager:master_bulk_delete_documents' %}" onsubmit="return confirm('Excluir os documentos selecionados?');">
+        {% csrf_token %}
+        <div class="bulk-actions">
+          <label class="select-all-row">
+            <input type="checkbox" data-select-all-documents>
+            Selecionar todos
+          </label>
+          <button class="button danger-button" type="submit">Excluir selecionados</button>
+        </div>
+        <div class="master-list">
+          {% for document in recent_documents %}
+            <article class="master-list-row document-admin-row">
+              <label class="document-select">
+                <input type="checkbox" name="document_ids" value="{{ document.pk }}">
+                <span class="sr-only">Selecionar {{ document.title }}</span>
+              </label>
+              <a href="/admin/pdf_manager/document/{{ document.pk }}/change/">
+                <span>{{ document.title }}</span>
+                <small>
+                  Enviado por:
+                  {% if document.owner %}
+                    {{ document.owner.get_full_name|default:document.owner.username }}
+                  {% else %}
+                    sem usuário vinculado
+                  {% endif %}
+                </small>
+                <small>Arquivo: {{ document.file.name|default:'sem arquivo' }}</small>
+                <small>Atualizado em {{ document.updated_at|date:'d/m/Y H:i' }}</small>
+              </a>
+              <button class="button danger-button" type="submit" formaction="{% url 'pdf_manager:master_delete_document' document.pk %}" onclick="return confirm('Excluir este documento?');">Excluir</button>
+            </article>
+          {% endfor %}
+        </div>
+      </form>
     {% else %}
       <p class="muted-text">Nenhum documento cadastrado.</p>
     {% endif %}
@@ -62,7 +82,7 @@
 
   <div class="section">
     <div class="section-heading">
-      <h2>Usuarios recentes</h2>
+      <h2>Usuários recentes</h2>
       <span>{{ users_count }} conta{{ users_count|pluralize }}</span>
     </div>
     {% if recent_users %}
@@ -70,13 +90,58 @@
         {% for user in recent_users %}
           <div class="master-list-row">
             <span>{{ user.get_full_name|default:user.username }}</span>
-            <small>{% if user.is_staff %}Admin{% else %}Usuario{% endif %} - {{ user.email|default:'sem e-mail' }}</small>
+            <small>{% if user.is_staff %}Admin{% else %}Usuário{% endif %} - {{ user.email|default:'sem e-mail' }}</small>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="muted-text">Nenhum usuario cadastrado.</p>
+      <p class="muted-text">Nenhum usuário cadastrado.</p>
     {% endif %}
   </div>
 </section>
+
+<section class="section master-activity-section">
+  <div class="section-heading">
+    <h2>Atividade recente das ferramentas</h2>
+    <span>Usuário, ferramenta, arquivo e data/hora</span>
+  </div>
+  {% if recent_logs %}
+    <div class="activity-table" role="table" aria-label="Atividade recente das ferramentas">
+      <div class="activity-row activity-head" role="row">
+        <span role="columnheader">Usuário</span>
+        <span role="columnheader">Ferramenta</span>
+        <span role="columnheader">Arquivo</span>
+        <span role="columnheader">Data e hora</span>
+      </div>
+      {% for log in recent_logs %}
+        <div class="activity-row" role="row">
+          <span role="cell">
+            {% if log.user %}
+              {{ log.user.get_full_name|default:log.user.username }}
+              <small>{{ log.user.email|default:'sem e-mail' }}</small>
+            {% else %}
+              Sem usuário
+              <small>registro sem conta vinculada</small>
+            {% endif %}
+          </span>
+          <span role="cell">{{ log.get_operation_display }}</span>
+          <span role="cell">{{ log.source_name|default:'sem arquivo informado' }}</span>
+          <span role="cell">{{ log.created_at|date:'d/m/Y H:i' }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted-text">Nenhuma atividade registrada ainda.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.querySelector('[data-select-all-documents]')?.addEventListener('change', function () {
+      document.querySelectorAll('input[name="document_ids"]').forEach((checkbox) => {
+        checkbox.checked = this.checked;
+      });
+    });
+  </script>
 {% endblock %}

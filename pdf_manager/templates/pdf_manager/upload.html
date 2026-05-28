@@ -5,7 +5,7 @@
 {% block content %}
 <section class="form-page">
   <h1>Enviar PDF</h1>
-  <p class="form-note">Tamanho maximo permitido: {{ max_upload_mb }} MB por PDF.</p>
+  <p class="form-note">Tamanho máximo permitido: {{ max_upload_mb }} MB por PDF.</p>
   <form method="post" enctype="multipart/form-data" class="panel">
     {% csrf_token %}
     {{ form.as_p }}

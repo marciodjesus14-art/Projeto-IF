@@ -12,11 +12,11 @@
       <h1>Criar conta</h1>
       <p>Use seu e-mail institucional para acessar as ferramentas de gerenciamento de documentos PDF.</p>
     </div>
-    <form method="post" class="access-form">
+    <form method="post" class="access-form" autocomplete="off">
       {% csrf_token %}
       {{ form.as_p }}
       <button class="button primary" type="submit">Criar conta</button>
-      <a class="button soft-button" href="{% url 'pdf_manager:login' %}">Ja tenho conta</a>
+      <a class="button soft-button" href="{% url 'pdf_manager:login' %}">Já tenho conta</a>
     </form>
   </div>
 </section>

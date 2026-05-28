@@ -8,11 +8,17 @@
   <div class="access-card">
     <img class="access-logo" src="{% static 'pdf_manager/marca-if-baiano-campus-bom-jesus-da-lapa-horizontal.png' %}" alt="Instituto Federal Baiano Campus Bom Jesus da Lapa">
     <div class="access-copy">
-      <p class="eyebrow">Acesso do usuario</p>
-      <h1>Entrar</h1>
-      <p>Acesse sua conta para usar as ferramentas e manter seus documentos vinculados ao seu perfil.</p>
+      <p class="eyebrow">Acesso do usuário</p>
+      <h1><span>IFDOC</span><span>EDITOR DE PDF PARA GESTÃO DOCUMENTAL</span></h1>
+      <p>Entre para organizar, converter, proteger e preparar documentos acadêmicos com privacidade.</p>
     </div>
-    <form method="post" class="access-form">
+    <div class="access-tools" aria-label="Ferramentas disponíveis">
+      <span>Organizar PDF</span>
+      <span>Juntar arquivos</span>
+      <span>Converter documentos</span>
+      <span>Proteger PDF</span>
+    </div>
+    <form method="post" class="access-form" autocomplete="off">
       {% csrf_token %}
       {{ form.as_p }}
       <button class="button primary" type="submit">Entrar</button>
